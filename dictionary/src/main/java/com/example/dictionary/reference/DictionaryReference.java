@@ -4,12 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class DictionaryReference {
@@ -36,20 +38,29 @@ public class DictionaryReference {
         // Implementation to read the dictionary file and populate the 'dictionary' map
 
         InputStream inputStream = DictionaryReference.class.getClassLoader()
-                .getResourceAsStream("dictionary.json");
+                        .getResourceAsStream("dictionary.json");
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         // TODO: Parse the JSON and populate the dictionary map
+        String json = bufferedReader.lines()
+                        .collect(Collectors.joining("/n"));
+        ObjectMapper objectMapper = new ObjectMapper(); //instantiate the object mapper
+        dictionary = objectMapper.readValue(json, Map.class);
+
 
         stopWatch.stop();
         long milliseconds = stopWatch.getLastTaskTimeMillis();
         String message = new StringBuilder().append("Dictionary created with ")
-                .append(dictionary.size())
-                .append(" entries in ")
-                .append(milliseconds)
-                .append("ms")
-                .toString();
+                                            .append(dictionary.size())
+                                            .append(" entries in ")
+                                            .append(milliseconds)
+                                            .append("ms")
+                                            .toString();
         logger.info(message);
+    }
+
+    public static Map<String, String> getDictionary() {
+        return DictionaryReference.dictionary;
     }
 }
